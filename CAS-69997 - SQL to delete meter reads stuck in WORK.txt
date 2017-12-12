@@ -1,0 +1,55 @@
+This will list all "stuck" meter reads:
+select * from um42300
+where umdocumentnumber like 'read%' and umdocloc = 1
+
+
+
+Have to find the meter read and get the READ###### number
+
+then
+
+Delete from UM42300 where umDocumentNumber in 'READ....', 'READ......')
+
+
+Oroginal code:
+select * from um42300 where umlocationid = '135433' and umdocumentnumber like 'read%' order by dex_row_id desc
+153912
+
+select * from um42300 where umlocationid = '153912' and umdocumentnumber like 'read%' order by dex_row_id desc
+
+delete from UM42300 where umDocumentNumber in ('READ00003474329','READ00003401969')
+
+
+select * from um10300 where umdocumentnumber = 'READ00003474329'
+select * from um10301 where umdocumentnumber = 'READ00003474329'
+
+
+
+select * from um20300 where umdocumentnumber = 'READ00003474329'
+select * from um20301 where umdocumentnumber = 'READ00003474329'
+
+
+
+select * from um30300 where umdocumentnumber = 'READ00003474329'
+select * from um30301 where umdocumentnumber = 'READ00003474329'
+
+
+
+
+SELECT A.umBatchID, A.umDocumentNumber,A.umReadingDate,A.umLocationID,B.umBillToCust,A.umEquipmentID,
+CASE WHEN A.umDocumentNumber = A.umDocumentNumber THEN 'WORK' END AS 'READ STATUS' FROM UM10300 A
+INNER JOIN UM00600 B ON B.umLocationID = A.umLocationID
+WHERE umDocumentNumber NOT IN (SELECT umDocumentNumber FROM UM42300)
+UNION 
+SELECT C.umBatchID, C.umDocumentNumber,C.umReadingDate,C.umLocationID,D.umBillToCust,C.umEquipmentID,
+CASE WHEN C.umDocumentNumber = C.umDocumentNumber THEN 'OPEN' END AS 'READ STATUS' FROM UM20300 C
+INNER JOIN UM00600 D ON D.umLocationID = C.umLocationID
+WHERE umDocumentNumber NOT IN (SELECT umDocumentNumber FROM UM42300) 
+UNION 
+SELECT E.UMBILLNUM, E.umDocumentNumber,E.umReadingDate,E.umLocationID,F.umBillToCust,E.umEquipmentID,
+CASE WHEN E.umDocumentNumber = E.umDocumentNumber THEN 'HISTORY' END AS 'READ STATUS' FROM UM30300 E
+INNER JOIN UM00600 F ON F.umLocationID = E.umLocationID
+WHERE umDocumentNumber NOT IN (SELECT umDocumentNumber FROM UM42300)
+
+select * from um42300 where umDocumentNumber not in
+(select umDocumentNumber from um10300) and umDocLoc = 1
