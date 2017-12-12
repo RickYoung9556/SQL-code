@@ -1,0 +1,60 @@
+--Fill in the umbatchid='' with the batch id you want to void 
+
+--select * from um20400 where umbatchid='' --Number of entries: ___
+--select * from um30400 where umbatchid=''  --Number of entries: ___
+
+declare @cycleID as char(15),
+		@BatchID as Char(15)
+
+select @cycleID = 'CYC-9'
+select @BatchID = 'PN 022614 KL'			
+
+select distinct misc.umDocumentNumber,misc.umLocationID,misc.CUSTNMBR, '1', 'sa' from um20400 misc
+		inner join UM00300 con on misc.umLocationID = con.umlocationid 
+		inner join UM40900 cyc on con.umRouteID = cyc.umRouteID
+		where misc.umDocumentNumber like 'pnlt%' and cyc.umCycleID = @cycleID
+			and misc.umBatchID = @BatchID
+select distinct misc.umDocumentNumber,misc.umLocationID,misc.CUSTNMBR, '1', 'sa' from um30400 misc
+		inner join UM00300 con on misc.umLocationID = con.umlocationid 
+		inner join UM40900 cyc on con.umRouteID = cyc.umRouteID
+		where misc.umDocumentNumber like 'pnlt%' and cyc.umCycleID = @cycleID
+			and misc.umBatchID = @BatchID
+
+--Make sure number of entries is equal to number in batch
+
+-- Total entries: ___
+-- Batch: ??? -- do they match?
+
+/* Step 1 is to insert the bills to be voided into the table*/
+
+--Check to see if there are any entries in the void table already
+select * from umvoid01
+delete from UMVOID01
+--if there ARE entries, clear the void table
+--truncate table umvoid01 
+
+insert into umvoid01(umDocumentNumber, umLocationID, CUSTNMBR,
+  umDocVoided, USERID)
+--select umdocumentnumber, umlocationid, CUSTNMBR, '1', 'sa'
+--from um20400 where umbatchid= '' 
+	select distinct misc.umDocumentNumber,misc.umLocationID,misc.CUSTNMBR, '1', 'sa' from um20400 misc
+		inner join UM00300 con on misc.umLocationID = con.umlocationid 
+		inner join UM40900 cyc on con.umRouteID = cyc.umRouteID
+		where misc.umDocumentNumber like 'pnlt%' and cyc.umCycleID = @cycleID
+			and misc.umBatchID = @BatchID
+	
+
+insert into umvoid01(umDocumentNumber, umLocationID, CUSTNMBR,
+  umDocVoided, USERID)
+--select umdocumentnumber, umlocationid, CUSTNMBR, '1', 'sa'
+--from um30400 where umbatchid='' 
+	select distinct misc.umDocumentNumber,misc.umLocationID,misc.CUSTNMBR, '1', 'sa' from um30400 misc
+		inner join UM00300 con on misc.umLocationID = con.umlocationid 
+		inner join UM40900 cyc on con.umRouteID = cyc.umRouteID
+		where misc.umDocumentNumber like 'pnlt%' and cyc.umCycleID = @cycleID
+			and misc.umBatchID = @BatchID
+
+select * from umvoid01 /* Check to make sure it is the number of records you got above*/
+
+/* step 2  - Open CSM and log in as "sa", and add 'Void Batch' window to shortcut bar.  Open the window, enter the batch ID, and click Redisplay.
+Click Select All, and click Void.  This will void all bills which are listed in this window and marked Void*/
